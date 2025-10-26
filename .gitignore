@@ -1,0 +1,16 @@
+/target
+**/*.rs.bk
+*.pdb
+Cargo.lock
+
+node_modules/
+dist/
+*.js.map
+.env
+.env.*
+*.log
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*.swo
