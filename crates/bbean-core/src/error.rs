@@ -28,3 +28,27 @@ pub enum EngineError {
 
     #[error("network error: {0}")]
     NetworkError(String),
+
+    #[error("capacity exceeded: {current}/{max}")]
+    CapacityExceeded { current: usize, max: usize },
+
+    #[error("timeout after {0:?}")]
+    Timeout(std::time::Duration),
+
+    #[error("serialization error: {0}")]
+    Serialization(#[from] serde_json::Error),
+
+    #[error("io error: {0}")]
+    Io(#[from] std::io::Error),
+
+    #[error("solana rpc error: {0}")]
+    SolanaRpc(String),
+
+    #[error("node disconnected: {0}")]
+    NodeDisconnected(String),
+
+    #[error("duplicate task id: {0}")]
+    DuplicateTaskId(String),
+}
+
+pub type Result<T> = std::result::Result<T, EngineError>;
