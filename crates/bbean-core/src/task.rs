@@ -57,3 +57,54 @@ impl PartialEq for ValidatedTask {
         self.inner.id == other.inner.id
     }
 }
+
+impl PartialOrd for ValidatedTask {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl Ord for ValidatedTask {
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.priority.weight().cmp(&other.priority.weight())
+    }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct TaskReceipt {
+    pub id: String,
+    pub status: TaskStatus,
+    pub queued_at: DateTime<Utc>,
+    pub estimated_wait_secs: Option<u64>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub enum TaskStatus {
+    Queued,
+    Assigned { node_id: String },
+    Running { node_id: String, started_at: DateTime<Utc> },
+    Completed { result: TaskResult },
+    Failed { error: String, retries: u32 },
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub struct TaskResult {
+    pub output: Vec<u8>,
+    pub proof_hash: String,
+    pub compute_time_ms: u64,
+    pub node_id: String,
+}
+
+impl Task {
+    pub fn new(model_id: impl Into<String>, payload: Vec<u8>) -> Self {
+        Self {
+            id: Uuid::new_v4().to_string(),
+            model_id: model_id.into(),
+            payload,
+            priority: None,
+            callback_url: None,
+            created_at: Utc::now(),
+        }
+    }
+
+    pub fn with_priority(mut self, priority: TaskPriority) -> Self {
