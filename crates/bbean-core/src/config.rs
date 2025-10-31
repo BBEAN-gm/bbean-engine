@@ -52,3 +52,44 @@ pub struct SolanaConfig {
     #[serde(default = "default_commitment")]
     pub commitment: String,
 }
+
+fn default_port() -> u16 { 9420 }
+fn default_host() -> String { "0.0.0.0".into() }
+fn default_max_nodes() -> usize { 10_000 }
+fn default_proof_difficulty() -> u8 { 16 }
+fn default_data_dir() -> PathBuf { PathBuf::from("./data") }
+fn default_queue_size() -> usize { 50_000 }
+fn default_task_timeout() -> u64 { 300 }
+fn default_max_retries() -> u32 { 3 }
+fn default_batch_size() -> usize { 64 }
+fn default_max_peers() -> usize { 256 }
+fn default_heartbeat() -> u64 { 30 }
+fn default_discovery_port() -> u16 { 9421 }
+fn default_rpc() -> String { "https://api.mainnet-beta.solana.com".into() }
+fn default_commitment() -> String { "confirmed".into() }
+
+impl Default for EngineConfig {
+    fn default() -> Self {
+        Self {
+            port: default_port(),
+            host: default_host(),
+            max_nodes: default_max_nodes(),
+            proof_difficulty: default_proof_difficulty(),
+            data_dir: default_data_dir(),
+            scheduler: SchedulerConfig::default(),
+            network: NetworkConfig::default(),
+            solana: SolanaConfig::default(),
+        }
+    }
+}
+
+impl Default for SchedulerConfig {
+    fn default() -> Self {
+        Self {
+            max_queue_size: default_queue_size(),
+            task_timeout_secs: default_task_timeout(),
+            max_retries: default_max_retries(),
+            batch_size: default_batch_size(),
+        }
+    }
+}
