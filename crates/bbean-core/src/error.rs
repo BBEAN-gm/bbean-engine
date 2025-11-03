@@ -1,3 +1,7 @@
+//! Error types for the BBEAN compute engine.
+//!
+//! All engine operations return `Result<T, EngineError>`.
+
 use thiserror::Error;
 
 #[derive(Error, Debug)]
