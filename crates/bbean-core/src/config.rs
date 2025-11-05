@@ -93,3 +93,42 @@ impl Default for SchedulerConfig {
         }
     }
 }
+
+impl Default for NetworkConfig {
+    fn default() -> Self {
+        Self {
+            max_peers: default_max_peers(),
+            heartbeat_interval_secs: default_heartbeat(),
+            discovery_port: default_discovery_port(),
+        }
+    }
+}
+
+impl Default for SolanaConfig {
+    fn default() -> Self {
+        Self {
+            rpc_url: default_rpc(),
+            program_id: None,
+            reward_mint: None,
+            commitment: default_commitment(),
+        }
+    }
+}
+
+impl EngineConfig {
+    pub fn from_file(path: &std::path::Path) -> crate::Result<Self> {
+        let content = std::fs::read_to_string(path)?;
+        let config: Self = serde_json::from_str(&content)?;
+        Ok(config)
+    }
+
+    pub fn validate(&self) -> crate::Result<()> {
+        if self.port == 0 {
+            return Err(crate::EngineError::InvalidTask("port cannot be 0".into()));
+        }
+        if self.max_nodes == 0 {
+            return Err(crate::EngineError::InvalidTask("max_nodes must be > 0".into()));
+        }
+        Ok(())
+    }
+}
