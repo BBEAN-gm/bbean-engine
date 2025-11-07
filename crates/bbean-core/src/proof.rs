@@ -73,3 +73,60 @@ impl BrewValidator {
             issued_at: now,
             expires_at: now + chrono::Duration::seconds(ttl_secs),
         }
+    }
+
+    fn compute_proof_hash(&self, proof: &BrewProof) -> Vec<u8> {
+        let mut hasher = Sha256::new();
+        hasher.update(proof.task_id.as_bytes());
+        hasher.update(proof.node_id.as_bytes());
+        hasher.update(proof.input_hash.as_bytes());
+        hasher.update(proof.output_hash.as_bytes());
+        hasher.update(proof.nonce.to_le_bytes());
+        hasher.finalize().to_vec()
+    }
+
+    fn compute_io_hash(&self, input: &str, output: &str) -> String {
+        let mut hasher = Sha256::new();
+        hasher.update(input.as_bytes());
+        hasher.update(output.as_bytes());
+        hex::encode(hasher.finalize())
+    }
+
+    pub fn difficulty(&self) -> u8 {
+        self.difficulty
+    }
+}
+
+pub fn hash_payload(data: &[u8]) -> String {
+    let mut hasher = Sha256::new();
+    hasher.update(data);
+    hex::encode(hasher.finalize())
+}
+
+fn count_leading_zero_bits(hash: &[u8]) -> usize {
+    let mut count = 0;
+    for byte in hash {
+        if *byte == 0 {
+            count += 8;
+        } else {
+            count += byte.leading_zeros() as usize;
+            break;
+        }
+    }
+    count
+}
+
+pub fn verify_hash_chain(hashes: &[String]) -> bool {
+    if hashes.len() < 2 {
+        return true;
+    }
+    for window in hashes.windows(2) {
+        let mut hasher = Sha256::new();
+        hasher.update(window[0].as_bytes());
+        let expected = hex::encode(hasher.finalize());
+        if expected != window[1] {
+            return false;
+        }
+    }
+    true
+}
