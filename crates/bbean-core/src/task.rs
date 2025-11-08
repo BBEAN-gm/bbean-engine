@@ -108,3 +108,63 @@ impl Task {
     }
 
     pub fn with_priority(mut self, priority: TaskPriority) -> Self {
+        self.priority = Some(priority);
+        self
+    }
+
+    pub fn with_callback(mut self, url: impl Into<String>) -> Self {
+        self.callback_url = Some(url.into());
+        self
+    }
+
+    pub fn payload_size(&self) -> usize {
+        self.payload.len()
+    }
+}
+
+pub struct Scheduler {
+    config: SchedulerConfig,
+    queue: RwLock<BinaryHeap<ValidatedTask>>,
+    tasks: RwLock<HashMap<String, TaskStatus>>,
+    running: RwLock<bool>,
+}
+
+impl Scheduler {
+    pub fn new(config: SchedulerConfig) -> Self {
+        Self {
+            config,
+            queue: RwLock::new(BinaryHeap::new()),
+            tasks: RwLock::new(HashMap::new()),
+            running: RwLock::new(false),
+        }
+    }
+
+    pub async fn start(&self) -> Result<()> {
+        let mut running = self.running.write().await;
+        *running = true;
+        tracing::info!(
+            "scheduler started (queue_size={}, batch={})",
+            self.config.max_queue_size,
+            self.config.batch_size
+        );
+        Ok(())
+    }
+
+    pub async fn stop(&self) -> Result<()> {
+        let mut running = self.running.write().await;
+        *running = false;
+        tracing::info!("scheduler stopped");
+        Ok(())
+    }
+
+    pub async fn enqueue(&self, task: ValidatedTask) -> Result<TaskReceipt> {
+        let running = self.running.read().await;
+        if !*running {
+            return Err(EngineError::SchedulerError("scheduler is not running".into()));
+        }
+        let mut queue = self.queue.write().await;
+        if queue.len() >= self.config.max_queue_size {
+            return Err(EngineError::CapacityExceeded {
+                current: queue.len(),
+                max: self.config.max_queue_size,
+            });
