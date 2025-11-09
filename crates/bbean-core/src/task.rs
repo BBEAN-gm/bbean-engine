@@ -168,3 +168,57 @@ impl Scheduler {
                 current: queue.len(),
                 max: self.config.max_queue_size,
             });
+        }
+        let task_id = task.inner.id.clone();
+        let receipt = TaskReceipt {
+            id: task_id.clone(),
+            status: TaskStatus::Queued,
+            queued_at: Utc::now(),
+            estimated_wait_secs: Some(queue.len() as u64 * 2),
+        };
+        let mut tasks = self.tasks.write().await;
+        if tasks.contains_key(&task_id) {
+            return Err(EngineError::DuplicateTaskId(task_id));
+        }
+        tasks.insert(task_id, TaskStatus::Queued);
+        queue.push(task);
+        Ok(receipt)
+    }
+
+    pub async fn dequeue_batch(&self) -> Vec<ValidatedTask> {
+        let mut queue = self.queue.write().await;
+        let count = self.config.batch_size.min(queue.len());
+        let mut batch = Vec::with_capacity(count);
+        for _ in 0..count {
+            if let Some(task) = queue.pop() {
+                batch.push(task);
+            }
+        }
+        batch
+    }
+
+    pub async fn get_status(&self, task_id: &str) -> Result<TaskStatus> {
+        let tasks = self.tasks.read().await;
+        tasks
+            .get(task_id)
+            .cloned()
+            .ok_or_else(|| EngineError::TaskNotFound(task_id.into()))
+    }
+
+    pub async fn update_status(&self, task_id: &str, status: TaskStatus) -> Result<()> {
+        let mut tasks = self.tasks.write().await;
+        if !tasks.contains_key(task_id) {
+            return Err(EngineError::TaskNotFound(task_id.into()));
+        }
+        tasks.insert(task_id.to_string(), status);
+        Ok(())
+    }
+
+    pub async fn queue_len(&self) -> usize {
+        self.queue.read().await.len()
+    }
+
+    pub async fn total_tasks(&self) -> usize {
+        self.tasks.read().await.len()
+    }
+}
