@@ -68,3 +68,44 @@ impl PeerManager {
                 states
                     .get(&p.id)
                     .map(|s| *s == PeerState::Connected || *s == PeerState::Authenticated)
+                    .unwrap_or(false)
+            })
+            .cloned()
+            .collect()
+    }
+
+    pub async fn update_latency(&self, peer_id: &str, latency_ms: u32) {
+        let mut peers = self.peers.write().await;
+        if let Some(peer) = peers.get_mut(peer_id) {
+            peer.latency_ms = Some(latency_ms);
+            peer.last_seen = Utc::now();
+        }
+    }
+
+    pub async fn peer_count(&self) -> usize {
+        self.peers.read().await.len()
+    }
+
+    pub async fn set_state(&self, peer_id: &str, state: PeerState) {
+        self.states
+            .write()
+            .await
+            .insert(peer_id.to_string(), state);
+    }
+
+    pub async fn prune_stale(&self, timeout_secs: i64) -> Vec<String> {
+        let now = Utc::now();
+        let mut peers = self.peers.write().await;
+        let mut states = self.states.write().await;
+        let stale: Vec<String> = peers
+            .values()
+            .filter(|p| (now - p.last_seen).num_seconds() > timeout_secs)
+            .map(|p| p.id.clone())
+            .collect();
+        for id in &stale {
+            peers.remove(id);
+            states.remove(id);
+        }
+        stale
+    }
+}
