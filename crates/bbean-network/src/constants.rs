@@ -1,0 +1,8 @@
+pub const PROTOCOL_VERSION: u8 = 1;
+pub const MAX_PEER_COUNT: usize = 1024;
+pub const DEFAULT_HEARTBEAT_SECS: u64 = 30;
+pub const HANDSHAKE_TIMEOUT_SECS: u64 = 10;
+pub const MAX_MESSAGE_SIZE: usize = 64 * 1024 * 1024;
+pub const STALE_PEER_TIMEOUT_SECS: i64 = 120;
+pub const RECONNECT_DELAY_MS: u64 = 5000;
+pub const MAX_RECONNECT_ATTEMPTS: u32 = 10;
