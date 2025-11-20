@@ -42,3 +42,57 @@ pub enum TransportError {
     #[error("channel closed")]
     ChannelClosed,
 }
+
+pub struct WsTransport {
+    config: TransportConfig,
+    outbound: mpsc::Sender<(String, ProtocolMessage)>,
+    _receiver: mpsc::Receiver<(String, ProtocolMessage)>,
+}
+
+impl WsTransport {
+    pub fn new(config: TransportConfig) -> Self {
+        let (tx, rx) = mpsc::channel(4096);
+        Self {
+            config,
+            outbound: tx,
+            _receiver: rx,
+        }
+    }
+
+    pub fn config(&self) -> &TransportConfig {
+        &self.config
+    }
+
+    fn check_message_size(&self, msg: &ProtocolMessage) -> std::result::Result<(), TransportError> {
+        let size = serde_json::to_vec(msg).unwrap_or_default().len();
+        if size > self.config.max_message_size {
+            return Err(TransportError::MessageTooLarge {
+                size,
+                max: self.config.max_message_size,
+            });
+        }
+        Ok(())
+    }
+}
+
+impl Transport for WsTransport {
+    fn send(&self, peer_id: &str, message: ProtocolMessage) -> std::result::Result<(), TransportError> {
+        self.check_message_size(&message)?;
+        self.outbound
+            .try_send((peer_id.to_string(), message))
+            .map_err(|_| TransportError::ChannelClosed)
+    }
+
+    fn broadcast(&self, message: ProtocolMessage) -> std::result::Result<usize, TransportError> {
+        self.check_message_size(&message)?;
+        self.outbound
+            .try_send(("*".to_string(), message))
+            .map_err(|_| TransportError::ChannelClosed)?;
+        Ok(1)
+    }
+
+    fn disconnect(&self, peer_id: &str) -> std::result::Result<(), TransportError> {
+        tracing::debug!(peer_id = peer_id, "disconnecting peer");
+        Ok(())
+    }
+}
