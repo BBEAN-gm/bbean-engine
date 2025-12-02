@@ -33,3 +33,29 @@ pub enum BbeanInstruction {
     UpdatePool {
         max_nodes: Option<u32>,
         reward_rate: Option<u64>,
+    },
+}
+
+impl BbeanInstruction {
+    pub fn unpack(data: &[u8]) -> Result<Self, ProgramError> {
+        Self::try_from_slice(data).map_err(|e| ProgramError::Serialization(e.to_string()))
+    }
+
+    pub fn pack(&self) -> Result<Vec<u8>, ProgramError> {
+        self.try_to_vec()
+            .map_err(|e| ProgramError::Serialization(e.to_string()))
+    }
+
+    pub fn instruction_name(&self) -> &'static str {
+        match self {
+            Self::InitializePool { .. } => "InitializePool",
+            Self::RegisterNode { .. } => "RegisterNode",
+            Self::SubmitProof { .. } => "SubmitProof",
+            Self::ClaimReward { .. } => "ClaimReward",
+            Self::UpdateRewardRate { .. } => "UpdateRewardRate",
+            Self::UnregisterNode { .. } => "UnregisterNode",
+            Self::BurnTokens { .. } => "BurnTokens",
+            Self::UpdatePool { .. } => "UpdatePool",
+        }
+    }
+}
