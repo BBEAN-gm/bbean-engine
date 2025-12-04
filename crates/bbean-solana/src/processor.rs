@@ -63,3 +63,58 @@ fn initialize_pool(
     if pool.initialized {
         return Err(ProgramError::AccountAlreadyInitialized);
     }
+    pool.reward_rate = reward_rate;
+    pool.max_nodes = max_nodes;
+    pool.initialized = true;
+    pool.total_distributed = 0;
+    pool.total_burned = 0;
+    Ok(ProcessResult::Initialized)
+}
+
+fn register_node(
+    pool: &mut RewardPool,
+    node_id: [u8; 32],
+    stake_amount: u64,
+) -> Result<ProcessResult, ProgramError> {
+    if !pool.initialized {
+        return Err(ProgramError::AccountNotInitialized);
+    }
+    if stake_amount < crate::MIN_STAKE_AMOUNT {
+        return Err(ProgramError::StakeBelowMinimum(stake_amount));
+    }
+    if pool.nodes.len() as u32 >= pool.max_nodes {
+        return Err(ProgramError::InvalidInstruction);
+    }
+    let node = NodeAccount {
+        node_id,
+        stake: stake_amount,
+        pending_rewards: 0,
+        tasks_completed: 0,
+        registered_at: current_timestamp(),
+        last_claim: 0,
+    };
+    pool.nodes.push(node);
+    pool.total_staked = pool
+        .total_staked
+        .checked_add(stake_amount)
+        .ok_or(ProgramError::ArithmeticOverflow)?;
+    Ok(ProcessResult::Registered { node_id })
+}
+
+fn submit_proof(
+    pool: &mut RewardPool,
+    task_id: [u8; 32],
+    proof_hash: [u8; 32],
+    compute_units: u64,
+) -> Result<ProcessResult, ProgramError> {
+    if !pool.initialized {
+        return Err(ProgramError::AccountNotInitialized);
+    }
+    let reward = compute_units
+        .checked_mul(pool.reward_rate)
+        .ok_or(ProgramError::ArithmeticOverflow)?;
+    let burn_amount = reward
+        .checked_mul(crate::BURN_RATE_BPS as u64)
+        .ok_or(ProgramError::ArithmeticOverflow)?
+        / 10_000;
+    let net_reward = reward
