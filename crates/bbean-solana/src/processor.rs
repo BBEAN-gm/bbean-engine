@@ -118,3 +118,75 @@ fn submit_proof(
         .ok_or(ProgramError::ArithmeticOverflow)?
         / 10_000;
     let net_reward = reward
+        .checked_sub(burn_amount)
+        .ok_or(ProgramError::ArithmeticOverflow)?;
+
+    pool.total_distributed = pool
+        .total_distributed
+        .checked_add(net_reward)
+        .ok_or(ProgramError::ArithmeticOverflow)?;
+    pool.total_burned = pool
+        .total_burned
+        .checked_add(burn_amount)
+        .ok_or(ProgramError::ArithmeticOverflow)?;
+
+    let record = TaskRecord {
+        task_id,
+        proof_hash,
+        compute_units,
+        reward: net_reward,
+        timestamp: current_timestamp(),
+    };
+    pool.task_history.push(record);
+    Ok(ProcessResult::ProofAccepted { reward: net_reward })
+}
+
+fn claim_reward(
+    pool: &mut RewardPool,
+    node_id: [u8; 32],
+) -> Result<ProcessResult, ProgramError> {
+    let node = pool
+        .nodes
+        .iter_mut()
+        .find(|n| n.node_id == node_id)
+        .ok_or(ProgramError::AccountNotInitialized)?;
+    let amount = node.pending_rewards;
+    if amount == 0 {
+        return Err(ProgramError::InsufficientFunds {
+            required: 1,
+            available: 0,
+        });
+    }
+    node.pending_rewards = 0;
+    node.last_claim = current_timestamp();
+    Ok(ProcessResult::RewardClaimed { amount })
+}
+
+fn unregister_node(
+    pool: &mut RewardPool,
+    node_id: [u8; 32],
+) -> Result<ProcessResult, ProgramError> {
+    let idx = pool
+        .nodes
+        .iter()
+        .position(|n| n.node_id == node_id)
+        .ok_or(ProgramError::AccountNotInitialized)?;
+    let node = pool.nodes.remove(idx);
+    pool.total_staked = pool.total_staked.saturating_sub(node.stake);
+    Ok(ProcessResult::Unregistered)
+}
+
+fn burn_tokens(pool: &mut RewardPool, amount: u64) -> Result<ProcessResult, ProgramError> {
+    pool.total_burned = pool
+        .total_burned
+        .checked_add(amount)
+        .ok_or(ProgramError::ArithmeticOverflow)?;
+    Ok(ProcessResult::Burned { amount })
+}
+
+fn current_timestamp() -> u64 {
+    std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .unwrap_or_default()
+        .as_secs()
+}
