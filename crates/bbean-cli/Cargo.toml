@@ -1,0 +1,16 @@
+[package]
+name = "bbean-cli"
+description = "CLI tool for BBEAN node operators"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+bbean-core = { path = "../bbean-core" }
+tokio.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+anyhow.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+chrono.workspace = true
