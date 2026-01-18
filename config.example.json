@@ -1,0 +1,22 @@
+{
+  "port": 9420,
+  "host": "0.0.0.0",
+  "max_nodes": 10000,
+  "proof_difficulty": 16,
+  "data_dir": "./data",
+  "scheduler": {
+    "max_queue_size": 50000,
+    "task_timeout_secs": 300,
+    "max_retries": 3,
+    "batch_size": 64
+  },
+  "network": {
+    "max_peers": 256,
+    "heartbeat_interval_secs": 30,
+    "discovery_port": 9421
+  },
+  "solana": {
+    "rpc_url": "https://api.mainnet-beta.solana.com",
+    "commitment": "confirmed"
+  }
+}
