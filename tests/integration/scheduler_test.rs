@@ -38,3 +38,66 @@ async fn test_scheduler_capacity_limit() {
     };
     let scheduler = Scheduler::new(config);
     scheduler.start().await.unwrap();
+
+    for i in 0..2 {
+        let task = Task::new(format!("model-{}", i), vec![i as u8]);
+        let validated = ValidatedTask {
+            inner: task,
+            priority: TaskPriority::Normal,
+            validated_at: chrono::Utc::now(),
+        };
+        scheduler.enqueue(validated).await.unwrap();
+    }
+
+    let task = Task::new("overflow", vec![99]);
+    let validated = ValidatedTask {
+        inner: task,
+        priority: TaskPriority::Normal,
+        validated_at: chrono::Utc::now(),
+    };
+    let result = scheduler.enqueue(validated).await;
+    assert!(result.is_err());
+}
+
+#[tokio::test]
+async fn test_scheduler_priority_ordering() {
+    let config = SchedulerConfig::default();
+    let scheduler = Scheduler::new(config);
+    scheduler.start().await.unwrap();
+
+    let low = ValidatedTask {
+        inner: Task::new("low-model", vec![1]),
+        priority: TaskPriority::Low,
+        validated_at: chrono::Utc::now(),
+    };
+    let high = ValidatedTask {
+        inner: Task::new("high-model", vec![2]),
+        priority: TaskPriority::Critical,
+        validated_at: chrono::Utc::now(),
+    };
+
+    scheduler.enqueue(low).await.unwrap();
+    scheduler.enqueue(high).await.unwrap();
+
+    let batch = scheduler.dequeue_batch().await;
+    assert_eq!(batch[0].inner.model_id, "high-model");
+}
+
+#[tokio::test]
+async fn test_task_status_tracking() {
+    let config = SchedulerConfig::default();
+    let scheduler = Scheduler::new(config);
+    scheduler.start().await.unwrap();
+
+    let task = Task::new("model", vec![1, 2, 3]);
+    let task_id = task.id.clone();
+    let validated = ValidatedTask {
+        inner: task,
+        priority: TaskPriority::Normal,
+        validated_at: chrono::Utc::now(),
+    };
+
+    scheduler.enqueue(validated).await.unwrap();
+    let status = scheduler.get_status(&task_id).await.unwrap();
+    assert_eq!(status, bbean_core::task::TaskStatus::Queued);
+}
