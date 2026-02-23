@@ -74,3 +74,12 @@ sequenceDiagram
     Solana->>Node: distribute $BBEAN
     Engine->>Agent: taskComplete(result)
 ```
+
+## Performance Considerations
+
+The engine is designed to handle high throughput:
+
+- Task queue supports up to 50,000 pending tasks
+- Semaphore-based concurrency control limits parallel dispatches
+- Node selection uses reliability-weighted scoring
+- Batch dequeue reduces lock contention on the priority queue
