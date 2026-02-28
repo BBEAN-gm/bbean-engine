@@ -28,3 +28,47 @@ BBEAN Engine is the core infrastructure behind the BBEAN network -- a decentrali
 graph LR
     A[AI Agent] -->|Task| B[BBEAN Engine]
     B -->|Schedule| C[Browser Mesh]
+    C -->|Proof| D[Brew Validator]
+    D -->|Settle| E[Solana]
+    E -->|$BBEAN| C
+```
+
+| Component | Crate | Description |
+|-----------|-------|-------------|
+| Core Engine | `bbean-core` | Task scheduling, node registry, proof validation, runtime executor |
+| Network | `bbean-network` | P2P transport, peer management, protocol messages |
+| Solana Program | `bbean-solana` | On-chain reward pool, staking, token burns |
+| CLI | `bbean-cli` | Node operator tooling |
+| TypeScript SDK | `@bbean/sdk` | Client library for AI agents |
+
+## Quick Start
+
+```bash
+git clone https://github.com/BBEAN-gm/bbean-engine.git
+cd bbean-engine
+cargo build --workspace
+cargo test --workspace
+```
+
+### Run a Node
+
+```bash
+cargo run --release -p bbean-cli -- start
+```
+
+### Submit a Task (TypeScript)
+
+```typescript
+import { BbeanClient, TaskPriority } from '@bbean/sdk';
+
+const client = new BbeanClient({
+  endpoint: 'http://localhost:9420',
+});
+
+await client.connect();
+
+const result = await client
+  .task('llama-7b')
+  .withPayload('Explain decentralized compute in one sentence.')
+  .withPriority(TaskPriority.High)
+  .submitAndWait();
