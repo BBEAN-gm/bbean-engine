@@ -72,3 +72,72 @@ const result = await client
   .withPayload('Explain decentralized compute in one sentence.')
   .withPriority(TaskPriority.High)
   .submitAndWait();
+
+console.log(new TextDecoder().decode(result.result?.output));
+```
+
+## Proof-of-Brew
+
+BBEAN uses a novel consensus mechanism called Proof-of-Brew to validate browser compute contributions:
+
+1. Engine issues a challenge with a target difficulty
+2. Browser node runs the inference task via WebGPU
+3. Node computes `SHA-256(task_id || node_id || input_hash || output_hash || nonce)` until the hash meets the difficulty requirement
+4. Proof is submitted and validated on-chain
+5. Rewards are distributed minus a 5% burn
+
+See [docs/protocol.md](docs/protocol.md) for the full specification.
+
+## Project Structure
+
+```
+bbean-engine/
+  crates/
+    bbean-core/       Core engine: scheduler, nodes, proofs, runtime
+    bbean-network/    P2P networking: peers, transport, protocol
+    bbean-solana/     Solana program: rewards, staking, burns
+    bbean-cli/        CLI for node operators
+  sdk/
+    typescript/       TypeScript SDK for AI agents
+  tests/              Integration tests
+  docs/               Protocol and architecture docs
+  scripts/            Setup and deployment scripts
+```
+
+## Configuration
+
+Create `config.json` in the project root:
+
+```json
+{
+  "port": 9420,
+  "max_nodes": 10000,
+  "proof_difficulty": 16,
+  "scheduler": {
+    "max_queue_size": 50000,
+    "batch_size": 64
+  },
+  "solana": {
+    "rpc_url": "https://api.mainnet-beta.solana.com"
+  }
+}
+```
+
+See [docs/getting-started.md](docs/getting-started.md) for full configuration reference.
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup and guidelines.
+
+## Security
+
+See [SECURITY.md](SECURITY.md) for our security policy and how to report vulnerabilities.
+
+## Links
+
+- [Website](https://bbean.fun)
+- [Documentation](docs/)
+
+## License
+
+MIT License. See [LICENSE](LICENSE) for details.
