@@ -74,6 +74,10 @@ impl NodeMetrics {
         }
     }
 
+    pub fn total_tasks(&self) -> u64 {
+        self.tasks_completed + self.tasks_failed
+    }
+
     pub fn success_rate(&self) -> f64 {
         let total = self.tasks_completed + self.tasks_failed;
         if total == 0 {
