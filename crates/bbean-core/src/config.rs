@@ -126,9 +126,6 @@ impl EngineConfig {
         if self.port == 0 {
             return Err(crate::EngineError::InvalidTask("port cannot be 0".into()));
         }
-        if self.proof_difficulty == 0 || self.proof_difficulty > 32 {
-            return Err(crate::EngineError::InvalidTask("proof_difficulty must be 1-32".into()));
-        }
         if self.max_nodes == 0 {
             return Err(crate::EngineError::InvalidTask("max_nodes must be > 0".into()));
         }
