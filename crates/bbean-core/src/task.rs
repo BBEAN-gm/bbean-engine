@@ -218,6 +218,11 @@ impl Scheduler {
         self.queue.read().await.len()
     }
 
+    pub async fn pending_count(&self) -> usize {
+        let tasks = self.tasks.read().await;
+        tasks.values().filter(|s| matches!(s, TaskStatus::Queued)).count()
+    }
+
     pub async fn total_tasks(&self) -> usize {
         self.tasks.read().await.len()
     }
