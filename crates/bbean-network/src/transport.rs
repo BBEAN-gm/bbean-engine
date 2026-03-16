@@ -17,7 +17,7 @@ impl Default for TransportConfig {
         Self {
             bind_address: "0.0.0.0:9420".parse().unwrap(),
             max_connections: 1024,
-            max_message_size: 32 * 1024 * 1024,
+            max_message_size: 64 * 1024 * 1024,
             ping_interval_secs: 30,
         }
     }
