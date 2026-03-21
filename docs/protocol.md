@@ -46,6 +46,14 @@ proof[n].input_hash = SHA-256(proof[n-1].output_hash)
 
 This creates an auditable chain of compute contributions that can be verified independently.
 
+## Reward Calculation
+
+The net reward for each task is calculated as:
+
+```
+net_reward = compute_units * reward_rate * (1 - burn_rate)
+```
+
 ## On-Chain Settlement
 
 Valid proofs are submitted to the Solana program which:
