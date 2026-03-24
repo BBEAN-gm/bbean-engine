@@ -22,3 +22,6 @@ sdk:
 	cd sdk/typescript && npm run build
 
 all: build sdk test
+
+bench:
+	./scripts/benchmark.sh
