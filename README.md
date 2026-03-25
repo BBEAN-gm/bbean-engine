@@ -324,8 +324,15 @@ curl http://localhost:9420/config
 
 ## TypeScript SDK
 
+```bash
+git clone https://github.com/BBEAN-gm/bbean-engine.git
+cd bbean-engine/sdk/typescript
+npm install
+npm run build
+```
+
 ```typescript
-import { BbeanClient, TaskPriority } from '@bbean/sdk';
+import { BbeanClient, TaskPriority } from './src';
 
 const client = new BbeanClient({
   endpoint: 'http://localhost:9420',
