@@ -14,3 +14,6 @@ dist/
 .vscode/
 *.swp
 *.swo
+*.profraw
+*.profdata
+config.json
