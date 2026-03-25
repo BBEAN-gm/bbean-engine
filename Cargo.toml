@@ -4,6 +4,7 @@ members = [
     "crates/bbean-core",
     "crates/bbean-network",
     "crates/bbean-solana",
+    "crates/bbean-api",
     "crates/bbean-cli",
 ]
 
@@ -28,3 +29,6 @@ uuid = { version = "1.6", features = ["v4", "serde"] }
 chrono = { version = "0.4", features = ["serde"] }
 rand = "0.8"
 borsh = "0.10"
+axum = "0.7"
+tower = "0.4"
+tower-http = { version = "0.5", features = ["cors", "trace"] }
