@@ -9,6 +9,7 @@
   <a href="https://github.com/BBEAN-gm/bbean-engine"><img src="https://img.shields.io/badge/rust-1.75+-6F4E37?style=for-the-badge&logo=rust&logoColor=D4A574&labelColor=2C1810" alt="Rust"></a>
   <a href="https://github.com/BBEAN-gm/bbean-engine"><img src="https://img.shields.io/badge/solana-mainnet-6F4E37?style=for-the-badge&logo=solana&logoColor=D4A574&labelColor=2C1810" alt="Solana"></a>
   <a href="https://bbean.fun"><img src="https://img.shields.io/badge/bbean.fun-6F4E37?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZD0iTTIgMjFoMThNNiAxN1Y3YTQgNCAwIDAgMSA4IDB2MTBNMTggN2EyIDIgMCAwIDEgMCA0aC0yIiBmaWxsPSJub25lIiBzdHJva2U9IiNENEE1NzQiIHN0cm9rZS13aWR0aD0iMiIvPjwvc3ZnPg==&labelColor=2C1810" alt="Website"></a>
+  <a href="https://x.com/bbeandotfun"><img src="https://img.shields.io/badge/X-@bbeandotfun-6F4E37?style=for-the-badge&logo=x&logoColor=D4A574&labelColor=2C1810" alt="Twitter"></a>
   <a href="https://github.com/BBEAN-gm/bbean-engine"><img src="https://img.shields.io/badge/DePIN-AI%20Compute-6F4E37?style=for-the-badge&labelColor=2C1810" alt="DePIN"></a>
 </p>
 
@@ -407,9 +408,11 @@ bbean-engine/
 <br>
 
 <p align="center">
-  <strong>
-    <a href="https://bbean.fun">bbean.fun</a>
-  </strong>
+  <a href="https://bbean.fun"><strong>bbean.fun</strong></a>
+  &nbsp;&nbsp;|&nbsp;&nbsp;
+  <a href="https://x.com/bbeandotfun"><strong>X (Twitter)</strong></a>
+  &nbsp;&nbsp;|&nbsp;&nbsp;
+  <a href="https://github.com/BBEAN-gm/bbean-engine"><strong>GitHub</strong></a>
   <br><br>
   <sub>MIT License</sub>
 </p>
