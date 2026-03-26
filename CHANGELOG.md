@@ -11,6 +11,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed
+- Adjusted default transport message size limits
+- Improved config validation for proof difficulty range
+
 ### Added
 - Core engine with task scheduling and node management
 - Proof-of-Brew consensus validation
